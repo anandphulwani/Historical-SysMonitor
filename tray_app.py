@@ -87,19 +87,36 @@ class SettingsDialog(QDialog):
         else:
             self.secondSpinBox.setMinimum(0)
 
+class SystemTrayApp(QSystemTrayIcon):
+    def __init__(self, icon, parent=None):
+        super(SystemTrayApp, self).__init__(icon, parent)
+        self.setToolTip(f"System Tray Utility")
+        self.menu = QMenu(parent)
+        settingsAction = QAction("Settings")
+        settingsAction.triggered.connect(self.showSettingsDialog)
+        self.menu.addAction(settingsAction)
+        exitAction = QAction("Exit")
+        exitAction.triggered.connect(sys.exit)
+        self.menu.addAction(exitAction)
+        self.setContextMenu(self.menu)
+        self.activated.connect(self.onTrayIconActivated)
+        self.settingsDialog = SettingsDialog()
+
+    def onTrayIconActivated(self, reason):
+        if reason == QSystemTrayIcon.Trigger:  # On double click
+            self.showSettingsDialog()
+
+    def showSettingsDialog(self):
+        if self.settingsDialog.exec_() == QDialog.Accepted:
+            # Here you can handle the accepted settings, e.g., start a timer based on the user input
+            pass
+
 def main():
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
 
     # Set up the system tray icon
-    trayIcon = QSystemTrayIcon(QIcon("icon_path.ico"), app)
-    menu = QMenu()
-
-    exitAction = QAction("Exit", menu)
-    exitAction.triggered.connect(app.quit)
-    menu.addAction(exitAction)
-
-    trayIcon.setContextMenu(menu)
+    trayIcon = SystemTrayApp(QIcon("icon_path.ico"))
     trayIcon.show()
     trayIcon.showMessage("System Tray Utility", "Application started. Double-click the tray icon to open settings.")
 
