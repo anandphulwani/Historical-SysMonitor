@@ -75,6 +75,17 @@ class SettingsDialog(QDialog):
             self.dirLineEdit.setText(dir)
 
     def saveSettings(self):
+        hours = self.hourSpinBox.value()
+        minutes = self.minuteSpinBox.value()
+        seconds = self.secondSpinBox.value()
+        interval_seconds = hours * 3600 + minutes * 60 + seconds
+        target_directory = self.dirLineEdit.text()
+        
+        global timer
+        if 'timer' in globals():
+            timer.stop()
+        timer = self.start_interval_call(interval_seconds, target_directory)
+        
         QMessageBox.information(self, "Settings Saved", "Your settings have been saved successfully.")
         self.accept()
 
