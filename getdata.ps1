@@ -27,12 +27,14 @@ function Get-DiskActivity {
 # Get process information
 $processInfo = Get-Process | Where-Object { $_.CPU -ne $null } | ForEach-Object {
     $diskActivity = Get-DiskActivity -processId $_.Id
-    "" | Select-Object @{Name="Name"; Expression={$_.Name}},
-                        @{Name="ID"; Expression={$_.Id}},
-                        @{Name="Memory (MB)"; Expression={[math]::Round($_.WS / 1MB, 2)}},
-                        @{Name="CPU (s)"; Expression={[math]::Round($_.CPU, 2)}},
-                        @{Name="Disk Read Bytes"; Expression={$diskActivity.ReadBytes}},
-                        @{Name="Disk Write Bytes"; Expression={$diskActivity.WriteBytes}}
+    [PSCustomObject]@{
+        Name = $_.ProcessName  # Use ProcessName or Name
+        ID = $_.Id
+        "Memory (MB)" = [math]::Round($_.WS / 1MB, 2)
+        "CPU (s)" = [math]::Round($_.CPU, 2)
+        "Disk Read Bytes" = $diskActivity.ReadBytes
+        "Disk Write Bytes" = $diskActivity.WriteBytes
+    }
 }
 
 # Sort and export process information to files within the target directory
