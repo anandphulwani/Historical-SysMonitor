@@ -1,8 +1,8 @@
 import sys
+import os
 from PyQt5.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QAction, QFileDialog, QDialog, QVBoxLayout, QLabel, QLineEdit, QSpinBox, QPushButton, QHBoxLayout, QMessageBox)
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QTimer
-import os
 
 class SettingsDialog(QDialog):
     def __init__(self):
