@@ -34,7 +34,7 @@ class SettingsDialog(QDialog):
         self.secondLabel = QLabel("Seconds:")
         self.secondSpinBox = QSpinBox(self)
         self.secondSpinBox.setRange(0, 59)  # 0 to 59 seconds
-        self.secondSpinBox.setValue(5)  # Default value to 5 seconds
+        self.secondSpinBox.setValue(15)  # Default value to 15 seconds
         intervalLayout.addWidget(self.secondLabel)
         intervalLayout.addWidget(self.secondSpinBox)
 
@@ -78,12 +78,12 @@ class SettingsDialog(QDialog):
     def resetSettings(self):
         self.hourSpinBox.setValue(0)
         self.minuteSpinBox.setValue(0)
-        self.secondSpinBox.setValue(5)
+        self.secondSpinBox.setValue(15)
         self.dirLineEdit.clear()
 
     def updateSecondSpinBoxRange(self):
         if self.minuteSpinBox.value() == 0 and self.hourSpinBox.value() == 0:
-            self.secondSpinBox.setMinimum(5)
+            self.secondSpinBox.setMinimum(15)
         else:
             self.secondSpinBox.setMinimum(0)
 
