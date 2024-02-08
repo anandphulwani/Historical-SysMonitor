@@ -88,16 +88,15 @@ class SettingsDialog(QDialog):
             self.secondSpinBox.setMinimum(0)
 
 class SystemTrayApp(QSystemTrayIcon):
-    def __init__(self, icon, parent=None):
+    def __init__(self, icon, parent):
         super(SystemTrayApp, self).__init__(icon, parent)
         self.setToolTip(f"System Tray Utility")
-        self.menu = QMenu(parent)
-        settingsAction = QAction("Settings")
-        settingsAction.triggered.connect(self.showSettingsDialog)
-        self.menu.addAction(settingsAction)
-        exitAction = QAction("Exit")
-        exitAction.triggered.connect(sys.exit)
+        self.menu = QMenu()
+        
+        exitAction = QAction("Exit", self.menu)
+        exitAction.triggered.connect(parent.quit)
         self.menu.addAction(exitAction)
+        
         self.setContextMenu(self.menu)
         self.activated.connect(self.onTrayIconActivated)
         self.settingsDialog = SettingsDialog()
@@ -116,7 +115,7 @@ def main():
     app.setQuitOnLastWindowClosed(False)
 
     # Set up the system tray icon
-    trayIcon = SystemTrayApp(QIcon("icon_path.ico"))
+    trayIcon = SystemTrayApp(QIcon("icon_path.ico"), app)
     trayIcon.show()
     trayIcon.showMessage("System Tray Utility", "Application started. Double-click the tray icon to open settings.")
 
