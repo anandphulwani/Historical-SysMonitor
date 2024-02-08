@@ -133,9 +133,7 @@ class SystemTrayApp(QSystemTrayIcon):
             self.showSettingsDialog()
 
     def showSettingsDialog(self):
-        if self.settingsDialog.exec_() == QDialog.Accepted:
-            # Here you can handle the accepted settings, e.g., start a timer based on the user input
-            pass
+        self.settingsDialog.exec_()
 
 def main():
     app = QApplication(sys.argv)
