@@ -47,7 +47,19 @@ $processInfo | Sort-Object "Disk Write Bytes" -Descending | Format-Table -AutoSi
 # Ensure to use Out-File with Join-Path to save the SystemResourceSummary.txt in the target directory
 
 # Example for System Resource Summary (shortened for brevity)
-$summaryContent = "System Resource Summary Placeholder"
+# System Resource Summary
+$cpuUsage = Get-Counter '\Processor(_Total)\% Processor Time' | Select-Object -ExpandProperty CounterSamples | Select-Object -ExpandProperty CookedValue
+$memUsage = Get-Counter '\Memory\Available MBytes' | Select-Object -ExpandProperty CounterSamples | Select-Object -ExpandProperty CookedValue
+$totalMem = Get-WmiObject Win32_ComputerSystem | Select-Object -ExpandProperty TotalPhysicalMemory
+$usedMem = $totalMem - ($memUsage * 1MB)
+
+$summaryContent = @"
+System Resource Summary:
+CPU Usage: $($cpuUsage)%
+Memory Usage: $([math]::Round($usedMem / 1GB, 2)) GB / $([math]::Round($totalMem / 1GB, 2)) GB
+"@
+
 $summaryContent | Out-File -FilePath (Join-Path $targetDir "SystemResourceSummary.txt")
+
 
 # Note: Automatic opening of files in Notepad is omitted due to the files being potentially located in a deeply nested directory structure
