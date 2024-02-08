@@ -1,7 +1,8 @@
 # PowerShell script to generate resource information files within date and time organized folders
 
-# Define base directory path (you can adjust this path as needed)
-$baseDir = "C:\ResourceReports"
+param (
+    [string]$baseDir
+)
 
 # Create directories based on current date and time
 $dateDir = Get-Date -Format "yyyy-MM-dd"
