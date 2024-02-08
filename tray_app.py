@@ -5,7 +5,23 @@ import threading
 import psutil
 from PyQt5.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QAction, QFileDialog, QDialog, QVBoxLayout, QLabel, QLineEdit, QSpinBox, QPushButton, QHBoxLayout, QMessageBox)
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, QTimer
+
+class PowerShellWorker(QObject):
+    finished = pyqtSignal()
+
+    def __init__(self, target_dir):
+        super().__init__()
+        self.target_dir = target_dir
+
+    def run_powershell_script(self):
+        powershell_script = '.\\getData.ps1'
+        command = f"powershell.exe -ExecutionPolicy Unrestricted -File {powershell_script} -baseDir \"{self.target_dir}\""
+        process = subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW, shell=False)
+        p = psutil.Process(process.pid)
+        p.nice(psutil.REALTIME_PRIORITY_CLASS)
+        process.wait()
+        self.finished.emit()
 
 class SettingsDialog(QDialog):
     def __init__(self):
@@ -81,10 +97,7 @@ class SettingsDialog(QDialog):
         interval_seconds = hours * 3600 + minutes * 60 + seconds
         target_directory = self.dirLineEdit.text()
         
-        global timer
-        if 'timer' in globals():
-            timer.stop()
-        timer = self.start_interval_call(interval_seconds, target_directory)
+        self.start_interval_call(interval_seconds, target_directory)
         
         QMessageBox.information(self, "Settings Saved", "Your settings have been saved successfully.")
         self.accept()
@@ -101,18 +114,21 @@ class SettingsDialog(QDialog):
         else:
             self.secondSpinBox.setMinimum(0)
 
-    def call_powershell(self, target_dir):
-        powershell_script = '.\\getData.ps1'
-        command = f"powershell.exe -ExecutionPolicy Unrestricted -File {powershell_script} -baseDir {target_dir}"
-        process = subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW, shell=False)
-        p = psutil.Process(process.pid)
-        p.nice(psutil.HIGH_PRIORITY_CLASS)
+    def run_powershell_in_thread(self, target_dir, interval_seconds):
+        self.thread = QThread()
+        self.worker = PowerShellWorker(target_dir)
+        self.worker.moveToThread(self.thread)
+
+        self.thread.started.connect(self.worker.run_powershell_script)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.finished.connect(lambda: QTimer.singleShot(interval_seconds * 1000, lambda: self.run_powershell_in_thread(target_dir, interval_seconds)))
+
+        self.thread.start()
 
     def start_interval_call(self, interval_seconds, target_dir):
-        timer = QTimer()
-        timer.timeout.connect(lambda: self.call_powershell(target_dir))
-        timer.start(interval_seconds * 1000)
-        return timer
+        self.run_powershell_in_thread(target_dir, interval_seconds)
 
 class SystemTrayApp(QSystemTrayIcon):
     def __init__(self, icon, parent):
