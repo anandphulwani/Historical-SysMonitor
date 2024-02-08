@@ -1,5 +1,8 @@
 import sys
 import os
+import subprocess
+import threading
+import psutil
 from PyQt5.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QAction, QFileDialog, QDialog, QVBoxLayout, QLabel, QLineEdit, QSpinBox, QPushButton, QHBoxLayout, QMessageBox)
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QTimer
@@ -86,6 +89,19 @@ class SettingsDialog(QDialog):
             self.secondSpinBox.setMinimum(15)
         else:
             self.secondSpinBox.setMinimum(0)
+
+    def call_powershell(self, target_dir):
+        powershell_script = '.\\getData.ps1'
+        command = f"powershell.exe -ExecutionPolicy Unrestricted -File {powershell_script} -baseDir {target_dir}"
+        process = subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW, shell=False)
+        p = psutil.Process(process.pid)
+        p.nice(psutil.HIGH_PRIORITY_CLASS)
+
+    def start_interval_call(self, interval_seconds, target_dir):
+        timer = QTimer()
+        timer.timeout.connect(lambda: self.call_powershell(target_dir))
+        timer.start(interval_seconds * 1000)
+        return timer
 
 class SystemTrayApp(QSystemTrayIcon):
     def __init__(self, icon, parent):
