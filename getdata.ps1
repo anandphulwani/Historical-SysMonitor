@@ -4,6 +4,11 @@ param (
     [string]$baseDir
 )
 
+# Launch typeperf command as a background job
+$typeperfJob = Start-Job -ScriptBlock {
+    typeperf "\Processor(_total)\% Processor Time" "\Memory\Available Bytes" "\LogicalDisk(C:)\% Disk Time" -sc 5
+}
+
 # Create directories based on current date and time
 $dateDir = Get-Date -Format "yyyy-MM-dd"
 $timeDir = Get-Date -Format "HHmmss"
@@ -29,8 +34,6 @@ $processInfo = Get-Process | Where-Object { $_.CPU -ne $null } | ForEach-Object 
     }
 }
 
-
-
 # Sort and export process information to files within the target directory
 $processInfo | Sort-Object "Memory (MB)" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "MemoryUsage.txt")
 $processInfo | Sort-Object "CPU (s)" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "CPUUsage.txt")
@@ -55,6 +58,66 @@ $diskTransfersPerSec = Get-Counter '\PhysicalDisk(_Total)\Disk Transfers/sec' -M
 $diskTransfers = ($diskTransfersPerSec.CounterSamples.CookedValue | Measure-Object -Average).Average
 $diskTransfersRounded = [math]::Round($diskTransfers, 2)
 
+Wait-Job $typeperfJob
+$typeperfResults = Receive-Job $typeperfJob
+Remove-Job $typeperfJob
+
+$lines = $typeperfResults -split "`n"
+$lines = $lines[2..($lines.Length - 3)]
+
+$columnValues = @(@(),@(),@())
+foreach ($line in $lines) {
+    $elements = $line -split "," | Select-Object -Skip 1 | ForEach-Object { $_.Trim('"') }
+    for ($i = 0; $i -lt $columnValues.Length; $i++) {
+        if ($i -eq 1) {
+            $value = [math]::Round([double]$elements[$i] / (1024 * 1024 * 1024), 2)
+            $columnValues[$i] += $value
+        } else {
+            $columnValues[$i] += [math]::Round([double]$elements[$i], 2)
+        }
+    }
+}
+
+# Calculate lowest, average, and highest for each column and round them
+$results = 0..($columnValues.Length - 1) | ForEach-Object {
+    $index = $_
+    $column = $columnValues[$_]
+
+    # Determine rounding precision based on column index
+    # $roundingPrecision = if ($index -eq 1) { 2 } else { 0 }
+    $roundingPrecision = 2
+
+    $lowest = [Math]::Round(($column | Measure-Object -Minimum).Minimum, $roundingPrecision)
+    $average = [Math]::Round(($column | Measure-Object -Average).Average, $roundingPrecision)
+    $highest = [Math]::Round(($column | Measure-Object -Maximum).Maximum, $roundingPrecision)
+    
+    # Return a custom object with the results for readability
+    [PSCustomObject]@{
+        Column = $index + 1
+        Lowest = $lowest
+        Average = $average
+        Highest = $highest
+    }
+}
+
+$totalMemoryFormatted = $([math]::Round($totalMem / 1GB, 2))
+$summaryLines = @()
+$labels = @("CPU Usage", "Free Memory Available", "Disk Usage")
+
+# Iterate through each result and format the output
+for ($i = 0; $i -lt $results.Count; $i++) {
+    $result = $results[$i]
+    $label = $labels[$i]
+    if ($result.Lowest -eq $result.Average -and $result.Average -eq $result.Highest) {
+        # Special formatting for identical values
+        $line = if ($i -eq 1) { "${label}: $($result.Lowest) GB/ $totalMemoryFormatted GB" } else { "${label}: $($result.Lowest)%" }
+    } else {
+        # Default formatting
+        $suffix = if ($i -eq 1) { " GB/ $totalMemoryFormatted GB" } else { "%" }
+        $line = "${label}: Lowest: $($result.Lowest)$suffix, Average: $($result.Average)$suffix, Highest: $($result.Highest)$suffix"
+    }
+    $summaryLines += $line
+}
 
 $summaryContent = @"
 System Resource Summary:
@@ -63,6 +126,6 @@ Memory Usage: $([math]::Round($usedMem / 1GB, 2)) GB / $([math]::Round($totalMem
 Disk Transfers/sec: $($diskTransfersRounded)
 "@
 
+$summaryContent += "`n`n`nTypeperf Results:`n" + ($summaryLines -join "`n")
 $summaryContent | Out-File -FilePath (Join-Path $targetDir "SystemResourceSummary.txt")
 
-# Note: Automatic opening of files in Notepad is omitted due to the files being potentially located in a deeply nested directory structure
