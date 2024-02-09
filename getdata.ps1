@@ -136,12 +136,10 @@ $processInfo | Sort-Object "CPU (s)" -Descending | Format-Table -AutoSize | Out-
 $processInfo | Sort-Object "Disk Read Bytes" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "DiskReadUsage.txt")
 $processInfo | Sort-Object "Disk Write Bytes" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "DiskWriteUsage.txt")
 
-$summaryContent = @"
-System Resource Summary:
-CPU Usage: $($cpuUsageRounded)%
-Memory Usage: $([math]::Round($usedMem / 1GB, 2)) GB / $([math]::Round($totalMem / 1GB, 2)) GB
-Disk Transfers/sec: $($diskTransfersRounded)
-"@
+$summaryContent = "System Resource Summary:`n" +
+"CPU Usage: $($cpuUsageRounded)%`n" +
+"Memory Usage: $([math]::Round($usedMem / 1GB, 2)) GB / $([math]::Round($totalMem / 1GB, 2)) GB`n" +
+"Disk Transfers/sec: $($diskTransfersRounded)`n"
 
 $summaryContent += "`n`n`nTypeperf Results:`n" + ($summaryLines -join "`n")
 $summaryContent | Out-File -FilePath (Join-Path $targetDir "SystemResourceSummary.txt")
