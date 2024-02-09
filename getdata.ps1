@@ -126,6 +126,8 @@ $exceedsThreshold = $cpuUsageAverage -ge $usageThreshold -or
                     $diskTransfersRounded -ge $usageThreshold -or
                     $memoryUsedPercentage -ge $usageThreshold
 
+
+if ($exceedsThreshold) {
 New-Item -ItemType Directory -Force -Path $targetDir
 
 # Sort and export process information to files within the target directory
@@ -143,4 +145,6 @@ Disk Transfers/sec: $($diskTransfersRounded)
 
 $summaryContent += "`n`n`nTypeperf Results:`n" + ($summaryLines -join "`n")
 $summaryContent | Out-File -FilePath (Join-Path $targetDir "SystemResourceSummary.txt")
-
+} else {
+    Write-Output "No metrics exceed the usage threshold of $usageThreshold%."
+}
