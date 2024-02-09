@@ -2,6 +2,7 @@
 
 param (
     [string]$baseDir
+    [int]$usageThreshold
 )
 
 # Launch typeperf command as a background job
