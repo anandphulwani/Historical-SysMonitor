@@ -19,13 +19,14 @@ def resource_path(relative_path):
 class PowerShellWorker(QObject):
     finished = pyqtSignal()
 
-    def __init__(self, target_dir):
+    def __init__(self, target_dir, usageThreshold):
         super().__init__()
         self.target_dir = target_dir
+        self.usageThreshold = usageThreshold
 
     def run_powershell_script(self):
         powershell_script = resource_path('getData.ps1')
-        command = f"powershell.exe -ExecutionPolicy Unrestricted -File {powershell_script} -baseDir \"{self.target_dir}\""
+        command = f"powershell.exe -ExecutionPolicy Unrestricted -File {powershell_script} -baseDir \"{self.target_dir}\" -usageThreshold {self.usageThreshold}"
         process = subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW, shell=False)
         p = psutil.Process(process.pid)
         p.nice(psutil.REALTIME_PRIORITY_CLASS)
@@ -148,8 +149,10 @@ class SettingsDialog(QDialog):
             self.secondSpinBox.setMinimum(0)
 
     def run_powershell_in_thread(self, target_dir, interval_seconds):
+        usageThreshold = self.usageSpinner.value() if self.usageSpinner.isEnabled() else 0
+
         self.thread = QThread()
-        self.worker = PowerShellWorker(target_dir)
+        self.worker = PowerShellWorker(target_dir, usageThreshold)
         self.worker.moveToThread(self.thread)
 
         self.thread.started.connect(self.worker.run_powershell_script)
