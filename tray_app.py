@@ -7,6 +7,15 @@ from PyQt5.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QAction, QFil
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, QTimer
 
+def resource_path(relative_path):
+    """ Get the absolute path to the resource, works for dev and for PyInstaller. """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")    
+    return os.path.join(base_path, relative_path)
+
 class PowerShellWorker(QObject):
     finished = pyqtSignal()
 
@@ -15,7 +24,7 @@ class PowerShellWorker(QObject):
         self.target_dir = target_dir
 
     def run_powershell_script(self):
-        powershell_script = '.\\getData.ps1'
+        powershell_script = resource_path('getData.ps1')
         command = f"powershell.exe -ExecutionPolicy Unrestricted -File {powershell_script} -baseDir \"{self.target_dir}\""
         process = subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW, shell=False)
         p = psutil.Process(process.pid)
@@ -156,7 +165,8 @@ def main():
     app.setQuitOnLastWindowClosed(False)
 
     # Set up the system tray icon
-    trayIcon = SystemTrayApp(QIcon("icon_path.ico"), app)
+    icon_path = resource_path('icon_path.ico')
+    trayIcon = SystemTrayApp(QIcon(icon_path), app)
     trayIcon.show()
     trayIcon.showMessage("System Tray Utility", "Application started. Double-click the tray icon to open settings.")
 
