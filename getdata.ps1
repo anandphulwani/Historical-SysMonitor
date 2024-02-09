@@ -15,7 +15,6 @@ $dateDir = Get-Date -Format "yyyy-MM-dd"
 $timeDir = Get-Date -Format "HHmmss"
 $targetDir = Join-Path -Path $baseDir -ChildPath $dateDir
 $targetDir = Join-Path -Path $targetDir -ChildPath $timeDir
-New-Item -ItemType Directory -Force -Path $targetDir
 
 # Fetch all disk activity data at once
 $allDiskActivity = Get-WmiObject Win32_PerfRawData_PerfProc_Process -Property IDProcess, IOReadBytesPersec, IOWriteBytesPersec
@@ -34,13 +33,6 @@ $processInfo = Get-Process | Where-Object { $_.CPU -ne $null } | ForEach-Object 
         "Disk Write Bytes" = $diskActivity.IOWriteBytesPersec
     }
 }
-
-# Sort and export process information to files within the target directory
-$processInfo | Sort-Object "Memory (MB)" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "MemoryUsage.txt")
-$processInfo | Sort-Object "CPU (s)" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "CPUUsage.txt")
-$processInfo | Sort-Object "Disk Read Bytes" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "DiskReadUsage.txt")
-$processInfo | Sort-Object "Disk Write Bytes" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "DiskWriteUsage.txt")
-
 
 # System Resource Summary
 # (The summary generation code goes here, similar to the previous example)
@@ -119,6 +111,14 @@ for ($i = 0; $i -lt $results.Count; $i++) {
     }
     $summaryLines += $line
 }
+
+New-Item -ItemType Directory -Force -Path $targetDir
+
+# Sort and export process information to files within the target directory
+$processInfo | Sort-Object "Memory (MB)" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "MemoryUsage.txt")
+$processInfo | Sort-Object "CPU (s)" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "CPUUsage.txt")
+$processInfo | Sort-Object "Disk Read Bytes" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "DiskReadUsage.txt")
+$processInfo | Sort-Object "Disk Write Bytes" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "DiskWriteUsage.txt")
 
 $summaryContent = @"
 System Resource Summary:
