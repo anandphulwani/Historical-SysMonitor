@@ -38,7 +38,7 @@ class SettingsDialog(QDialog):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle("Settings")
+        self.setWindowTitle("Historical SysMonitor: Settings")
         layout = QVBoxLayout()
 
         # Interval layout with hours, minutes, and seconds
