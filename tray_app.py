@@ -3,9 +3,9 @@ import os
 import subprocess
 import threading
 import psutil
-from PyQt5.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QAction, QFileDialog, QDialog, QVBoxLayout, QLabel, QLineEdit, QSpinBox, QPushButton, QHBoxLayout, QMessageBox)
+from PyQt5.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QAction, QFileDialog, QDialog, QVBoxLayout, QLabel, QLineEdit, QCheckBox, QSpinBox, QPushButton, QHBoxLayout, QMessageBox)
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QObject, QThread, pyqtSignal, QTimer
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, QTimer, Qt
 
 def resource_path(relative_path):
     """ Get the absolute path to the resource, works for dev and for PyInstaller. """
@@ -85,6 +85,24 @@ class SettingsDialog(QDialog):
         dirLayout.addWidget(self.browseButton)
         layout.addLayout(dirLayout)
 
+        usageLayout = QHBoxLayout()
+        # Resource usage logging checkbox
+        self.logUsageCheckbox = QCheckBox("Log only when resource usage is more than")
+        self.logUsageCheckbox.stateChanged.connect(self.toggleUsageSpinner)
+        usageLayout.addWidget(self.logUsageCheckbox)
+
+        # Spinner for specifying the percentage
+        self.usageSpinner = QSpinBox(self)
+        self.usageSpinner.setRange(0, 100)
+        self.usageSpinner.setEnabled(False)
+        self.usageSpinner.setFixedWidth(50)
+        usageLayout.addWidget(self.usageSpinner)
+
+        # Label for displaying "%"
+        percentageLabel = QLabel("%")
+        usageLayout.addWidget(percentageLabel)
+        layout.addLayout(usageLayout)
+
         # Buttons layout
         buttonsLayout = QHBoxLayout()
         self.saveButton = QPushButton("Save")
@@ -101,6 +119,9 @@ class SettingsDialog(QDialog):
         dir = QFileDialog.getExistingDirectory(self, "Select Directory")
         if dir:
             self.dirLineEdit.setText(dir)
+
+    def toggleUsageSpinner(self, state):
+        self.usageSpinner.setEnabled(state == Qt.Checked)
 
     def saveSettings(self):
         hours = self.hourSpinBox.value()
