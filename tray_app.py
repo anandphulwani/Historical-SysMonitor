@@ -142,7 +142,7 @@ class SettingsDialog(QDialog):
 class SystemTrayApp(QSystemTrayIcon):
     def __init__(self, icon, parent):
         super(SystemTrayApp, self).__init__(icon, parent)
-        self.setToolTip(f"System Tray Utility")
+        self.setToolTip(f"Historical SysMonitor Tray Utility")
         self.menu = QMenu()
         
         exitAction = QAction("Exit", self.menu)
