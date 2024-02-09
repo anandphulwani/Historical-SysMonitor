@@ -112,6 +112,20 @@ for ($i = 0; $i -lt $results.Count; $i++) {
     $summaryLines += $line
 }
 
+# Assuming $results is already populated and structured as expected
+$cpuUsageAverage = $results[0].Average
+$diskUsageAverage = $results[2].Average
+
+# Calculate Memory Used Percentage from Free Memory Available
+# Assuming total memory is in GB and free memory is reported in the results in GB
+$freeMemoryGB = $results[1].Average
+$memoryUsedPercentage = [math]::Round((($totalMemoryGB - $freeMemoryGB) / $totalMemoryGB) * 100, 2)
+
+# Check if any metric's average exceeds the usageThreshold
+$exceedsThreshold = $cpuUsageAverage -ge $usageThreshold -or
+                    $diskTransfersRounded -ge $usageThreshold -or
+                    $memoryUsedPercentage -ge $usageThreshold
+
 New-Item -ItemType Directory -Force -Path $targetDir
 
 # Sort and export process information to files within the target directory
