@@ -11,32 +11,25 @@ $targetDir = Join-Path -Path $baseDir -ChildPath $dateDir
 $targetDir = Join-Path -Path $targetDir -ChildPath $timeDir
 New-Item -ItemType Directory -Force -Path $targetDir
 
-# Function to get disk activity
-function Get-DiskActivity {
-    param (
-        [Parameter(Mandatory=$true)]
-        [int]$processId
-    )
-
-    $diskActivity = Get-WmiObject Win32_PerfRawData_PerfProc_Process | Where-Object { $_.IDProcess -eq $processId }
-    return @{
-        ReadBytes = $diskActivity.IOReadBytesPersec;
-        WriteBytes = $diskActivity.IOWriteBytesPersec
-    }
-}
+# Fetch all disk activity data at once
+$allDiskActivity = Get-WmiObject Win32_PerfRawData_PerfProc_Process -Property IDProcess, IOReadBytesPersec, IOWriteBytesPersec
 
 # Get process information
 $processInfo = Get-Process | Where-Object { $_.CPU -ne $null } | ForEach-Object {
-    $diskActivity = Get-DiskActivity -processId $_.Id
+    $currentProcessId = $_.Id  # Capture the process ID to avoid $_ confusion
+    $diskActivity = $allDiskActivity | Where-Object { $_.IDProcess -eq $currentProcessId }
+
     [PSCustomObject]@{
-        Name = $_.ProcessName  # Use ProcessName or Name
-        ID = $_.Id
+        Name = $_.ProcessName
+        ID = $currentProcessId
         "Memory (MB)" = [math]::Round($_.WS / 1MB, 2)
         "CPU (s)" = [math]::Round($_.CPU, 2)
-        "Disk Read Bytes" = $diskActivity.ReadBytes
-        "Disk Write Bytes" = $diskActivity.WriteBytes
+        "Disk Read Bytes" = $diskActivity.IOReadBytesPersec
+        "Disk Write Bytes" = $diskActivity.IOWriteBytesPersec
     }
 }
+
+
 
 # Sort and export process information to files within the target directory
 $processInfo | Sort-Object "Memory (MB)" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "MemoryUsage.txt")
