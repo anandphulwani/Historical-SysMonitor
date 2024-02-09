@@ -128,21 +128,21 @@ $exceedsThreshold = $cpuUsageAverage -ge $usageThreshold -or
 
 
 if ($exceedsThreshold) {
-New-Item -ItemType Directory -Force -Path $targetDir
+    New-Item -ItemType Directory -Force -Path $targetDir
 
-# Sort and export process information to files within the target directory
-$processInfo | Sort-Object "Memory (MB)" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "MemoryUsage.txt")
-$processInfo | Sort-Object "CPU (s)" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "CPUUsage.txt")
-$processInfo | Sort-Object "Disk Read Bytes" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "DiskReadUsage.txt")
-$processInfo | Sort-Object "Disk Write Bytes" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "DiskWriteUsage.txt")
+    # Sort and export process information to files within the target directory
+    $processInfo | Sort-Object "Memory (MB)" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "MemoryUsage.txt")
+    $processInfo | Sort-Object "CPU (s)" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "CPUUsage.txt")
+    $processInfo | Sort-Object "Disk Read Bytes" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "DiskReadUsage.txt")
+    $processInfo | Sort-Object "Disk Write Bytes" -Descending | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -FilePath (Join-Path $targetDir "DiskWriteUsage.txt")
 
-$summaryContent = "System Resource Summary:`n" +
-"CPU Usage: $($cpuUsageRounded)%`n" +
-"Memory Usage: $([math]::Round($usedMem / 1GB, 2)) GB / $([math]::Round($totalMem / 1GB, 2)) GB`n" +
-"Disk Transfers/sec: $($diskTransfersRounded)`n"
+    $summaryContent = "System Resource Summary:`n" +
+    "CPU Usage: $($cpuUsageRounded)%`n" +
+    "Memory Usage: $([math]::Round($usedMem / 1GB, 2)) GB / $([math]::Round($totalMem / 1GB, 2)) GB`n" +
+    "Disk Transfers/sec: $($diskTransfersRounded)`n"
 
-$summaryContent += "`n`n`nTypeperf Results:`n" + ($summaryLines -join "`n")
-$summaryContent | Out-File -FilePath (Join-Path $targetDir "SystemResourceSummary.txt")
+    $summaryContent += "`n`n`nTypeperf Results:`n" + ($summaryLines -join "`n")
+    $summaryContent | Out-File -FilePath (Join-Path $targetDir "SystemResourceSummary.txt")
 } else {
     Write-Output "No metrics exceed the usage threshold of $usageThreshold%."
 }
