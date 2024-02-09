@@ -1,7 +1,7 @@
 # PowerShell script to generate resource information files within date and time organized folders
 
 param (
-    [string]$baseDir
+    [string]$baseDir,
     [int]$usageThreshold
 )
 
