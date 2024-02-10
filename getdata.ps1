@@ -83,6 +83,13 @@ $results = 0..($columnValues.Length - 1) | ForEach-Object {
     $average = [Math]::Round(($column | Measure-Object -Average).Average, $roundingPrecision)
     $highest = [Math]::Round(($column | Measure-Object -Maximum).Maximum, $roundingPrecision)
     
+    # Ensure values for 1st and 3rd elements do not exceed 100
+    if ($index -eq 0 -or $index -eq 2) {
+        $lowest = [Math]::Min($lowest, 100)
+        $average = [Math]::Min($average, 100)
+        $highest = [Math]::Min($highest, 100)
+    }
+
     # Return a custom object with the results for readability
     [PSCustomObject]@{
         Column = $index + 1
