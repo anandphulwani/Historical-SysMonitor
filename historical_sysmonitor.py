@@ -130,9 +130,10 @@ class SettingsDialog(QDialog):
         seconds = self.secondSpinBox.value()
         interval_seconds = hours * 3600 + minutes * 60 + seconds
         target_directory = self.dirLineEdit.text()
-        
-        self.start_interval_call(interval_seconds, target_directory)
-        
+        usageThreshold = self.usageSpinner.value() if self.usageSpinner.isEnabled() else 0
+
+        self.start_interval_call(interval_seconds, target_directory, usageThreshold)
+
         QMessageBox.information(self, "Settings Saved", "Your settings have been saved successfully.")
         self.accept()
 
@@ -148,9 +149,7 @@ class SettingsDialog(QDialog):
         else:
             self.secondSpinBox.setMinimum(0)
 
-    def run_powershell_in_thread(self, interval_seconds, target_dir):
-        usageThreshold = self.usageSpinner.value() if self.usageSpinner.isEnabled() else 0
-
+    def run_powershell_in_thread(self, interval_seconds, target_dir, usageThreshold):
         self.thread = QThread()
         self.worker = PowerShellWorker(target_dir, usageThreshold)
         self.worker.moveToThread(self.thread)
@@ -159,12 +158,12 @@ class SettingsDialog(QDialog):
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
-        self.worker.finished.connect(lambda: QTimer.singleShot(interval_seconds * 1000, lambda: self.run_powershell_in_thread(interval_seconds, target_dir)))
+        self.worker.finished.connect(lambda: QTimer.singleShot(interval_seconds * 1000, lambda: self.run_powershell_in_thread(interval_seconds, target_dir, usageThreshold)))
 
         self.thread.start()
 
-    def start_interval_call(self, interval_seconds, target_dir):
-        self.run_powershell_in_thread(interval_seconds, target_dir)
+    def start_interval_call(self, interval_seconds, target_dir, usageThreshold):
+        self.run_powershell_in_thread(interval_seconds, target_dir, usageThreshold)
 
 class SystemTrayApp(QSystemTrayIcon):
     def __init__(self, icon, parent):
