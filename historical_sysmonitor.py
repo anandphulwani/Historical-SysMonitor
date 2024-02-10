@@ -137,7 +137,11 @@ class SettingsDialog(QDialog):
             self.dirLineEdit.setText(dir)
 
     def toggleUsageSpinner(self, state):
-        self.usageSpinner.setEnabled(state == Qt.Checked)
+        if state == Qt.Checked:
+            self.usageSpinner.setEnabled(True)
+        else:
+            self.usageSpinner.setEnabled(False)
+            self.usageSpinner.setValue(0)
 
     def saveSettings(self):
         hours = self.hourSpinBox.value()
