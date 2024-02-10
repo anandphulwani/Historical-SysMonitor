@@ -19,7 +19,7 @@ This repository contains a set of tools designed to monitor and log system resou
    - Use Git or download the ZIP to get the repository files on your local machine.
 
 2. **Install Python Dependencies:**
-   - Run `pip install PyQt5 psutil` to install the required Python packages.
+   - Run `pip install PyQt5 psutil pyinstaller` to install the required Python packages.
 
 3. **Ensure PowerShell Execution Policy:**
    - Run `Set-ExecutionPolicy RemoteSigned` in PowerShell as an Administrator to allow script execution.
