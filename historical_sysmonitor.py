@@ -36,6 +36,7 @@ class PowerShellWorker(QObject):
 class SettingsDialog(QDialog):
     def __init__(self):
         super().__init__()
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.initUI()
         self.interval_seconds = 15
         self.target_dir = ""
