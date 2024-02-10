@@ -37,6 +37,10 @@ class SettingsDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.interval_seconds = 15
+        self.target_dir = ""
+        self.usageThreshold = 0
+        self.isThreadStarted = False
 
     def initUI(self):
         self.setWindowTitle("Historical SysMonitor: Settings")
@@ -128,11 +132,13 @@ class SettingsDialog(QDialog):
         hours = self.hourSpinBox.value()
         minutes = self.minuteSpinBox.value()
         seconds = self.secondSpinBox.value()
-        interval_seconds = hours * 3600 + minutes * 60 + seconds
-        target_directory = self.dirLineEdit.text()
-        usageThreshold = self.usageSpinner.value() if self.usageSpinner.isEnabled() else 0
+        self.interval_seconds = hours * 3600 + minutes * 60 + seconds
+        self.target_dir = self.dirLineEdit.text()
+        self.usageThreshold = self.usageSpinner.value() if self.usageSpinner.isEnabled() else 0
 
-        self.run_powershell_in_thread(interval_seconds, target_directory, usageThreshold)
+        if self.isThreadStarted == False:
+            self.run_powershell_in_thread()
+            self.isThreadStarted = True
 
         QMessageBox.information(self, "Settings Saved", "Your settings have been saved successfully.")
         self.accept()
@@ -149,16 +155,16 @@ class SettingsDialog(QDialog):
         else:
             self.secondSpinBox.setMinimum(0)
 
-    def run_powershell_in_thread(self, interval_seconds, target_dir, usageThreshold):
+    def run_powershell_in_thread(self):
         self.thread = QThread()
-        self.worker = PowerShellWorker(target_dir, usageThreshold)
+        self.worker = PowerShellWorker(self.target_dir, self.usageThreshold)
         self.worker.moveToThread(self.thread)
 
         self.thread.started.connect(self.worker.run_powershell_script)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
-        self.worker.finished.connect(lambda: QTimer.singleShot(interval_seconds * 1000, lambda: self.run_powershell_in_thread(interval_seconds, target_dir, usageThreshold)))
+        self.worker.finished.connect(lambda: QTimer.singleShot(self.interval_seconds * 1000, lambda: self.run_powershell_in_thread()))
 
         self.thread.start()
 
