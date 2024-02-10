@@ -109,10 +109,10 @@ for ($i = 0; $i -lt $results.Count; $i++) {
     $label = $labels[$i]
     if ($result.Lowest -eq $result.Average -and $result.Average -eq $result.Highest) {
         # Special formatting for identical values
-        $line = if ($i -eq 1) { "${label}: $($result.Lowest) GB/ $totalMemoryFormatted GB" } else { "${label}: $($result.Lowest)%" }
+        $line = if ($i -eq 1) { "${label}: $($result.Lowest) GB / $totalMemoryFormatted GB" } else { "${label}: $($result.Lowest)%" }
     } else {
         # Default formatting
-        $suffix = if ($i -eq 1) { " GB/ $totalMemoryFormatted GB" } else { "%" }
+        $suffix = if ($i -eq 1) { " GB / $totalMemoryFormatted GB" } else { "%" }
         $line = "${label}: Lowest: $($result.Lowest)$suffix, Average: $($result.Average)$suffix, Highest: $($result.Highest)$suffix"
     }
     $summaryLines += $line
