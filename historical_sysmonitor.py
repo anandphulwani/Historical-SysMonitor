@@ -5,7 +5,7 @@ import threading
 import psutil
 from PyQt5.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QAction, QFileDialog, QDialog, QVBoxLayout, QLabel, QLineEdit, QCheckBox, QSpinBox, QPushButton, QHBoxLayout, QMessageBox)
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QObject, QThread, pyqtSignal, QTimer, Qt
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, QTimer, Qt, QSettings
 
 def resource_path(relative_path):
     """ Get the absolute path to the resource, works for dev and for PyInstaller. """
@@ -40,7 +40,18 @@ class SettingsDialog(QDialog):
         self.interval_seconds = 15
         self.target_dir = ""
         self.usageThreshold = 0
+        self.loadSettings()
         self.isThreadStarted = False
+
+    def loadSettings(self):
+        settings = QSettings("Harlax Software", "Historical SysMonitor")
+
+        self.hourSpinBox.setValue(settings.value("hours", 0, type=int))
+        self.minuteSpinBox.setValue(settings.value("minutes", 0, type=int))
+        self.secondSpinBox.setValue(settings.value("seconds", 15, type=int))
+        self.dirLineEdit.setText(settings.value("target_directory", "", type=str))
+        self.usageSpinner.setValue(settings.value("usageThreshold", 0, type=int))
+        self.logUsageCheckbox.setChecked(settings.value("logUsageChecked", False, type=bool))
 
     def initUI(self):
         self.setWindowTitle("Historical SysMonitor: Settings")
@@ -139,6 +150,15 @@ class SettingsDialog(QDialog):
         if self.isThreadStarted == False:
             self.run_powershell_in_thread()
             self.isThreadStarted = True
+
+        settings = QSettings("Harlax Software", "Historical SysMonitor")
+
+        settings.setValue("hours", self.hourSpinBox.value())
+        settings.setValue("minutes", self.minuteSpinBox.value())
+        settings.setValue("seconds", self.secondSpinBox.value())
+        settings.setValue("target_directory", self.dirLineEdit.text())
+        settings.setValue("usageThreshold", self.usageSpinner.value())
+        settings.setValue("logUsageChecked", int(self.logUsageCheckbox.isChecked()))
 
         QMessageBox.information(self, "Settings Saved", "Your settings have been saved successfully.")
         self.accept()
