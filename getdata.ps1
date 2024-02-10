@@ -119,7 +119,7 @@ $diskUsageAverage = $results[2].Average
 # Calculate Memory Used Percentage from Free Memory Available
 # Assuming total memory is in GB and free memory is reported in the results in GB
 $freeMemoryGB = $results[1].Average
-$memoryUsedPercentage = [math]::Round((($totalMemoryGB - $freeMemoryGB) / $totalMemoryGB) * 100, 2)
+$memoryUsedPercentage = [math]::Round((($totalMemoryFormatted - $freeMemoryGB) / $totalMemoryFormatted) * 100, 2)
 
 # Check if any metric's average exceeds the usageThreshold
 $exceedsThreshold = $cpuUsageAverage -ge $usageThreshold -or
