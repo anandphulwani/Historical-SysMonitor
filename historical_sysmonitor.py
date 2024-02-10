@@ -132,7 +132,7 @@ class SettingsDialog(QDialog):
         target_directory = self.dirLineEdit.text()
         usageThreshold = self.usageSpinner.value() if self.usageSpinner.isEnabled() else 0
 
-        self.start_interval_call(interval_seconds, target_directory, usageThreshold)
+        self.run_powershell_in_thread(interval_seconds, target_directory, usageThreshold)
 
         QMessageBox.information(self, "Settings Saved", "Your settings have been saved successfully.")
         self.accept()
@@ -161,9 +161,6 @@ class SettingsDialog(QDialog):
         self.worker.finished.connect(lambda: QTimer.singleShot(interval_seconds * 1000, lambda: self.run_powershell_in_thread(interval_seconds, target_dir, usageThreshold)))
 
         self.thread.start()
-
-    def start_interval_call(self, interval_seconds, target_dir, usageThreshold):
-        self.run_powershell_in_thread(interval_seconds, target_dir, usageThreshold)
 
 class SystemTrayApp(QSystemTrayIcon):
     def __init__(self, icon, parent):
