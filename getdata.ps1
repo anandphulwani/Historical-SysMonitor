@@ -123,7 +123,7 @@ $memoryUsedPercentage = [math]::Round((($totalMemoryFormatted - $freeMemoryGB) /
 
 # Check if any metric's average exceeds the usageThreshold
 $exceedsThreshold = $cpuUsageAverage -ge $usageThreshold -or
-                    $diskTransfersRounded -ge $usageThreshold -or
+                    $diskUsageAverage -ge $usageThreshold -or
                     $memoryUsedPercentage -ge $usageThreshold
 
 
