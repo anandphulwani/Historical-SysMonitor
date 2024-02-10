@@ -139,7 +139,7 @@ if ($exceedsThreshold) {
 
     $summaryContent = "System Resource Summary:`n" +
     "CPU Usage: $($cpuUsageRounded)%`n" +
-    "Memory Usage: $([math]::Round($usedMem / 1GB, 2)) GB / $([math]::Round($totalMem / 1GB, 2)) GB`n" +
+    "Memory Usage: $([math]::Round($usedMem / 1GB, 2)) GB / $([math]::Round($totalMem / 1GB, 2)) GB  ($memoryUsedPercentage%)`n" +
     "Disk Transfers/sec: $($diskTransfersRounded)`n"
 
     $summaryContent += "`n`n`nTypeperf Results:`n" + ($summaryLines -join "`n")
