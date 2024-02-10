@@ -120,6 +120,7 @@ $diskUsageAverage = $results[2].Average
 # Assuming total memory is in GB and free memory is reported in the results in GB
 $freeMemoryGB = $results[1].Average
 $memoryUsedPercentage = [math]::Round((($totalMemoryFormatted - $freeMemoryGB) / $totalMemoryFormatted) * 100, 2)
+Write-Output "Metrics: CPU: $cpuUsageAverage, DISK: $diskUsageAverage, MEMORY: $memoryUsedPercentage"
 
 # Check if any metric's average exceeds the usageThreshold
 $exceedsThreshold = $cpuUsageAverage -ge $usageThreshold -or
