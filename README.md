@@ -1,4 +1,4 @@
-# Historical SysMonitor Repository README
+# Historical SysMonitor
 
 ## Introduction
 
@@ -45,6 +45,29 @@ This repository contains a set of tools designed to monitor and log system resou
 - **PowerShell Script:**
   - **Base Directory (-baseDir):** Path to save the log files, passed by the Python script.
   - **Usage Threshold (-usageThreshold):** The minimum percentage of resource usage to trigger logging, also passed by the Python script.
+
+## Download and Run
+
+- Download the latest [historical_sysmonitor.exe](https://github.com/anandphulwani/Historical-SysMonitor/releases/latest/download/historical_sysmonitor.exe) executable from the release section, and you are ready to use.
+
+## Screenshots
+
+Below are screenshots showcasing the application in action:
+
+- **Tray Icon:**
+  - ![Tray Icon](screenshots/TrayIcon.png)
+
+- **Settings Dialog:**
+  - ![Settings Dialog](screenshots/SettingsDialog.png)
+
+- **List Of Files:**
+  - ![List Of Files](screenshots/ListOfFiles.png)
+
+- **CPU Usage: (`Memory Usage`, `Disk Read Usage` and `Disk Write Usage` are similar)**
+  - ![CPU Usage](screenshots/OutputSortedByCPU.png)
+
+- **System Resource Summary:**
+  - ![System Resource Summary](screenshots/OutputSystemResourceSummary.png)
 
 ## Contributions and Issues
 
