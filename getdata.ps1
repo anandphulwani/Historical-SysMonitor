@@ -77,7 +77,6 @@ $results = 0..($columnValues.Length - 1) | ForEach-Object {
     $column = $columnValues[$_]
 
     # Determine rounding precision based on column index
-    # $roundingPrecision = if ($index -eq 1) { 2 } else { 0 }
     $roundingPrecision = 2
 
     $lowest = [Math]::Round(($column | Measure-Object -Minimum).Minimum, $roundingPrecision)
