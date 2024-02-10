@@ -222,7 +222,7 @@ def main():
     icon_path = resource_path('icon_path.ico')
     trayIcon = SystemTrayApp(QIcon(icon_path), app)
     trayIcon.show()
-    trayIcon.showMessage("System Tray Utility", "Application started. Double-click the tray icon to open settings.")
+    trayIcon.showMessage("Historical SysMonitor Tray Utility", "Application started. Double-click the tray icon to open settings.")
 
     sys.exit(app.exec_())
 
